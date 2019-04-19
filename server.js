@@ -14,8 +14,7 @@ var getGroceries = async function(store) {
     var response = await request.get(options);
     jsonResponse = JSON.parse(response);
     var groceries = {};
-    for (var i = 0; i < jsonResponse.items.length; i++) {
-        var item = jsonResponse.items[i];
+    jsonResponse.items.forEach(function(item) {
         if (item.category_names.length > 0) {
             if (!(item.category_names[0] in groceries)) {
                 groceries[item.category_names[0]] = [];
@@ -31,7 +30,7 @@ var getGroceries = async function(store) {
                 store: store.name
             });
         }
-    }
+    });
     for (var category in groceries) {
         groceries[category].sort(function(a, b) {
             if (a.name > b.name) {
@@ -66,6 +65,9 @@ var getFlyerId = async function(url) {
                 }
             });
         });
+    if (flyerId === undefined) {
+        console.log(options.url);
+    }
     return flyerId;
 };
 
@@ -116,8 +118,32 @@ app.get('/getGroceries', async function(req, res) {
     for (var i = 0; i < stores.length; i++) {
         var store = stores[i];
         store.flyerId = await getFlyerId(store.flyerIdURL);
-        groceries[store.name] = await getGroceries(store);
+        if (store.flyerId !== undefined) {
+            groceries[store.name] = await getGroceries(store);
+        }
     }
+    allStores = {};
+    for (var store in groceries) {
+        for (var category in groceries[store]) {
+            if (!(category in allStores)) {
+                allStores[category] = groceries[store][category];
+            } else {
+                allStores[category] = allStores[category].concat(groceries[store][category]);
+            }
+        }
+    }
+    for (var category in allStores) {
+        allStores[category].sort(function(a, b) {
+            if (a.name > b.name) {
+                return 1;
+            } else if (a.name < b.name) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+    }
+    groceries.allStores = allStores;
     res.send(JSON.stringify(groceries));
 });
 
@@ -127,3 +153,8 @@ app.get(/^(\/static\/.+)$/, function(req, res) {
 
 app.listen(port);
 console.log('Listing on port ' + port);
+
+process.on('unhandledRejection', function(error) {
+    console.error(error);
+    process.exit(1);
+});

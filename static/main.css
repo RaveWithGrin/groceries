@@ -40,6 +40,8 @@ body {
     grid-row-start: 2;
     grid-row-end: 3;
     background-color: darkgreen;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .tab {
@@ -55,4 +57,34 @@ body {
     display: flex;
     margin: 5px;
     cursor: default;
+}
+
+.item {
+    display: flex;
+    flex-flow: column;
+    border: 1px solid black;
+    width: 225px;
+    align-content: center;
+    align-items: center;
+    background-color: white;
+    height: 325px;
+    margin: 5px;
+}
+
+.item-image {
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+}
+
+.item-name {
+}
+
+.item-description {
+}
+
+.item-price {
+}
+
+.item-time {
 }
