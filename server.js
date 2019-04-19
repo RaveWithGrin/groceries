@@ -1,3 +1,6 @@
+var express = require('express');
+var morgan = require('morgan');
+var path = require('path');
 var request = require('request-promise');
 var cheerio = require('cheerio');
 
@@ -66,7 +69,17 @@ var getFlyerId = async function(url) {
     return flyerId;
 };
 
-var main = async function() {
+var app = express();
+var port = process.env.PORT || 8081;
+
+app.use(morgan('tiny'));
+app.set('view engine', 'ejs');
+
+app.get('/', function(req, res) {
+    res.sendFile('main.html', { root: __dirname });
+});
+
+app.get('/getGroceries', async function(req, res) {
     var stores = [
         {
             name: 'No Frills',
@@ -105,12 +118,12 @@ var main = async function() {
         store.flyerId = await getFlyerId(store.flyerIdURL);
         groceries[store.name] = await getGroceries(store);
     }
-    console.log(JSON.stringify(groceries, null, 2));
-};
-
-main();
-
-process.on('unhandledRejection', function(error) {
-    console.error(error);
-    process.exit(1);
+    res.send(JSON.stringify(groceries));
 });
+
+app.get(/^(\/static\/.+)$/, function(req, res) {
+    res.sendFile(req.params[0], { root: __dirname });
+});
+
+app.listen(port);
+console.log('Listing on port ' + port);
