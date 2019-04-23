@@ -80,6 +80,10 @@ body {
 .item-name {
 }
 
+.item-wanted {
+    color: gold;
+}
+
 .item-description {
 }
 
